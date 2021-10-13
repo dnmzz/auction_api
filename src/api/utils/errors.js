@@ -18,9 +18,9 @@ module.exports = {
         },
         e2: {
             http: 400,
-            code: "UserEmailAlreadyExists",
+            code: "UserAlreadyExists",
             message: {
-                eng: "User email already exists."
+                eng: "User already exists. Please login."
             },
             type: "error"
         },
@@ -53,6 +53,14 @@ module.exports = {
             code: "InvalidToken",
             message: {
                 eng: "The token that you provided is invalid."
+            },
+            type: "error"
+        },
+        e8: {
+            http: 401,
+            code: "InvalidCredentials",
+            message: {
+                eng: "Invalid Credentials"
             },
             type: "error"
         }

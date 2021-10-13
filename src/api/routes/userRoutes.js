@@ -9,4 +9,6 @@ router.post('/signup', userController.signup);
 
 router.post('/login', userController.login);
 
+router.get('/user/:id', auth, userController.findUser);
+
 module.exports = router;

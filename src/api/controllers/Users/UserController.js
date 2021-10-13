@@ -6,12 +6,12 @@ const ERRORS = require('../../utils/errors');
 
 exports.getUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find({}, '-__v');
 
         if (users.length == 0) {
-            return res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
+            res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
         } else {
-            return res.status(201).json(users);
+            return res.status(200).send(users);
         }
     } catch (err) {
         console.log(err);
@@ -32,7 +32,7 @@ exports.signup = async (req, res) => {
         const oldUser = await User.findOne({ email });
 
         if (oldUser) {
-            return res.status(409).send("User Already Exist. Please Login");
+            return res.status(ERRORS.error.e2.http).send(ERRORS.error.e2);
         }
 
         //Encrypt user password
@@ -70,7 +70,7 @@ exports.login = async (req, res) => {
         const { email, password } = req.body;
 
         if (!(email && password)) {
-            res.status(400).send("All input is required");
+            res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
         }
 
         // Validate if user exist in our database
@@ -92,7 +92,23 @@ exports.login = async (req, res) => {
             // user
             res.status(200).json(user);
         } else {
-            res.status(400).send("Invalid Credentials");
+            res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
+        }
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+exports.findUser = async (req, res) => {
+    try {
+        var id = req.params.id;
+        const user = await User.findById(id);
+
+        if (id && user && user.length != 0) {
+            res.status(200).json(user);
+        } else {
+            res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
         }
 
     } catch (err) {
