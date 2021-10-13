@@ -99,7 +99,3 @@ exports.login = async (req, res) => {
         console.log(err);
     }
 }
-
-exports.welcome = (req, res) => {
-    res.status(200).send("Welcome " + req.body.email + " 🙌");
-}
