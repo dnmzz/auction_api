@@ -3,18 +3,18 @@ const User = require("../../models/users/user");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const ERRORS = require('../../utils/errors');
+const UserService = require('../../services/Users/UserService');
 
 exports.getUsers = async (req, res) => {
     try {
-        const users = await User.find({}, '-__v');
-
-        if (users.length == 0) {
-            res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
-        } else {
+        const users = await UserService.getUser();
+        if (users.length != 0) {
             return res.status(200).send(users);
         }
+        res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
+
     } catch (err) {
-        console.log(err);
+        res.status(ERRORS.error.e0.http).send(ERRORS.error.e0);
     }
 }
 
@@ -103,15 +103,16 @@ exports.login = async (req, res) => {
 exports.findUser = async (req, res) => {
     try {
         var id = req.params.id;
-        const user = await User.findById(id);
 
-        if (id && user && user.length != 0) {
-            res.status(200).json(user);
-        } else {
-            res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
+        if (id) {
+            const user = await UserService.findUserById(id);
+            if (user && user.length != 0) {
+                res.status(200).json(user);
+            } else {
+                res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
+            }
         }
-
     } catch (err) {
-        console.log(err);
+        res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
     }
 }
