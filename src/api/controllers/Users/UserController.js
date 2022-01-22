@@ -8,7 +8,6 @@ const Api400Error = require('../../utils/HttpErrors/api400Error');
 const Api401Error = require('../../utils/HttpErrors/api401Error');
 const Api404Error = require('../../utils/HttpErrors/api404Error');
 
-
 exports.getUsers = async (req, res) => {
     try {
         const users = await UserService.findUsers();
