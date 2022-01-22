@@ -22,7 +22,6 @@ exports.findUserById = async (user_id) => {
         if (!user) {
             throw new Api404Error(`User with id: ${user_id} not found.`);
         }
-
         return user;
     } catch (error) {
         throw new Api404Error(`User with id: ${user_id} not found.`);
@@ -35,7 +34,6 @@ exports.findUserByEmail = async (user_email) => {
     if (!user) {
         throw new Api404Error(`User with email: ${user_email} not found.`);
     }
-
     return user;
 }
 
