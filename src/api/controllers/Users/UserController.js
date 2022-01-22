@@ -4,8 +4,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const ERRORS = require('../../utils/errors');
 const UserService = require('../../services/Users/UserService');
-const Api404Error = require('../../utils/HttpErrors/api404Error');
+const Api400Error = require('../../utils/HttpErrors/api400Error');
 const Api401Error = require('../../utils/HttpErrors/api401Error');
+const Api404Error = require('../../utils/HttpErrors/api404Error');
+
 
 exports.getUsers = async (req, res) => {
     try {
@@ -19,54 +21,23 @@ exports.getUsers = async (req, res) => {
 }
 
 exports.signup = async (req, res) => {
+    const { first_name, last_name, email, password } = req.body;
+
+    if (!(email && password && first_name && last_name)) {
+        res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
+    }
+
     try {
-        const { first_name, last_name, email, password } = req.body;
-
-        // Validate user input
-        if (!(email && password && first_name && last_name)) {
-            res.status(400).send("All input is required");
-        }
-
-        // check if user already exist
-        // Validate if user exist in our database
-        const oldUser = await User.findOne({ email });
-
-        if (oldUser) {
-            return res.status(ERRORS.error.e2.http).send(ERRORS.error.e2);
-        }
-
-        //Encrypt user password
-        encrypted_password = await bcrypt.hash(password, 10);
-
-        // Create user in our database
-        const user = await User.create({
-            first_name,
-            last_name,
-            email: email.toLowerCase(), // sanitize: convert email to lowercase
-            password: encrypted_password,
-        });
-
-        // Create token
-        const token = jwt.sign(
-            { user_id: user._id, email },
-            process.env.TOKEN_KEY,
-            {
-                expiresIn: "2h",
-            }
-        );
-        // save user token
-        user.token = token;
-
-        // return new user
-        res.status(201).json(user);
-
+        const response = await UserService.createUserAccount(first_name, last_name, email, password);
+        res.status(201).json(response);
     } catch (err) {
-        console.log(err);
+        if (err instanceof Api400Error) {
+            res.status(err.statusCode).send(err);
+        }
     }
 }
 
 exports.login = async (req, res) => {
-
     const { email, password } = req.body;
 
     if (!(email && password)) {
