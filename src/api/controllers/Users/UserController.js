@@ -1,7 +1,4 @@
 require("dotenv").config();
-const User = require("../../models/users/user");
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const ERRORS = require('../../utils/errors');
 const UserService = require('../../services/Users/UserService');
 const Api400Error = require('../../utils/HttpErrors/api400Error');
