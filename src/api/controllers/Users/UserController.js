@@ -4,17 +4,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const ERRORS = require('../../utils/errors');
 const UserService = require('../../services/Users/UserService');
+const Api404Error = require('../../utils/HttpErrors/api404Error');
+const Api401Error = require('../../utils/HttpErrors/api401Error');
 
 exports.getUsers = async (req, res) => {
     try {
-        const users = await UserService.getUser();
-        if (users.length != 0) {
-            return res.status(200).send(users);
-        }
-        res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
-
+        const users = await UserService.findUsers();
+        res.status(200).send(users);
     } catch (err) {
-        res.status(ERRORS.error.e0.http).send(ERRORS.error.e0);
+        if (err instanceof Api404Error) {
+            res.status(err.statusCode).send(err);
+        }
     }
 }
 
@@ -66,53 +66,38 @@ exports.signup = async (req, res) => {
 }
 
 exports.login = async (req, res) => {
+
+    const { email, password } = req.body;
+
+    if (!(email && password)) {
+        res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
+    }
+
     try {
-        const { email, password } = req.body;
-
-        if (!(email && password)) {
-            res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
-        }
-
-        // Validate if user exist in our database
-        const user = await User.findOne({ email });
-
-        if (user && (await bcrypt.compare(password, user.password))) {
-            // Create token
-            const token = jwt.sign(
-                { user_id: user._id, email },
-                process.env.TOKEN_KEY,
-                {
-                    expiresIn: "2h",
-                }
-            );
-
-            // save user token
-            user.token = token;
-
-            // user
-            res.status(200).json(user);
-        } else {
-            res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
-        }
-
+        const response = await UserService.generateToken(email, password);
+        res.status(200).json(response);
     } catch (err) {
-        console.log(err);
+        if (err instanceof Api404Error) {
+            res.status(err.statusCode).send(err);
+        } else if (err instanceof Api401Error) {
+            res.status(err.statusCode).send(err);
+        }
     }
 }
 
-exports.findUser = async (req, res) => {
-    try {
-        var id = req.params.id;
+exports.getUser = async (req, res) => {
+    var id = req.params.id;
 
-        if (id) {
+    if (id) {
+        try {
             const user = await UserService.findUserById(id);
-            if (user && user.length != 0) {
-                res.status(200).json(user);
-            } else {
-                res.status(ERRORS.error.e3.http).send(ERRORS.error.e3);
+            res.status(200).json(user);
+        } catch (err) {
+            if (err instanceof Api404Error) {
+                res.status(err.statusCode).send(err);
             }
         }
-    } catch (err) {
+    } else {
         res.status(ERRORS.error.e8.http).send(ERRORS.error.e8);
     }
 }
